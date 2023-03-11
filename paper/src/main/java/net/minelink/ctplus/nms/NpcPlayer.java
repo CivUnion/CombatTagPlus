@@ -2,16 +2,17 @@ package net.minelink.ctplus.nms;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import java.util.Map;
-import java.util.UUID;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minelink.ctplus.compat.base.NpcIdentity;
 import net.minelink.ctplus.compat.base.NpcNameGeneratorFactory;
-import org.bukkit.craftbukkit.v1_18_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_18_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+
+import java.util.Map;
+import java.util.UUID;
 
 public class NpcPlayer extends ServerPlayer {
 

@@ -2,16 +2,12 @@ package net.minelink.ctplus.nms;
 
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.List;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -24,9 +20,15 @@ import net.minelink.ctplus.compat.base.NpcIdentity;
 import net.minelink.ctplus.compat.base.NpcPlayerHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_18_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_18_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R2.CraftWorld;
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.List;
 
 public class NpcPlayerHelperImpl implements NpcPlayerHelper {
     @Override
@@ -43,11 +45,12 @@ public class NpcPlayerHelperImpl implements NpcPlayerHelper {
         for (ServerPlayer serverPlayer : MinecraftServer.getServer().getPlayerList().getPlayers()) {
             if (serverPlayer instanceof NpcPlayer) continue;
 
-            ClientboundPlayerInfoPacket packet = new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, npcPlayer);
+            ClientboundPlayerInfoUpdatePacket packet = new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, npcPlayer);
             serverPlayer.connection.send(packet);
         }
 
-        worldServer.entityManager.addNewEntity(npcPlayer);
+        worldServer.addFreshEntity(npcPlayer);
+
 
         return npcPlayer.getBukkitEntity();
     }
@@ -62,7 +65,7 @@ public class NpcPlayerHelperImpl implements NpcPlayerHelper {
         for (ServerPlayer serverPlayer : MinecraftServer.getServer().getPlayerList().getPlayers()) {
             if (serverPlayer instanceof NpcPlayer) continue;
 
-            ClientboundPlayerInfoPacket packet = new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER, entity);
+            ClientboundPlayerInfoRemovePacket packet = new ClientboundPlayerInfoRemovePacket(List.of(entity.getUUID()));
             serverPlayer.connection.send(packet);
         }
 
@@ -174,8 +177,8 @@ public class NpcPlayerHelperImpl implements NpcPlayerHelper {
         ServerPlayer p = ((CraftPlayer) player).getHandle();
 
         for (ServerPlayer serverPlayer : MinecraftServer.getServer().getPlayerList().getPlayers()) {
-            ClientboundPlayerInfoPacket packet = new ClientboundPlayerInfoPacket(
-                    ClientboundPlayerInfoPacket.Action.ADD_PLAYER, serverPlayer);
+            ClientboundPlayerInfoUpdatePacket packet = new ClientboundPlayerInfoUpdatePacket(
+                    ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, serverPlayer);
             p.connection.send(packet);
         }
     }
@@ -184,7 +187,7 @@ public class NpcPlayerHelperImpl implements NpcPlayerHelper {
     public void removePlayerList(Player player) {
         ServerPlayer p = ((CraftPlayer) player).getHandle();
         for (ServerPlayer serverPlayer : MinecraftServer.getServer().getPlayerList().getPlayers()) {
-            ClientboundPlayerInfoPacket packet = new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER, serverPlayer);
+            ClientboundPlayerInfoRemovePacket packet = new ClientboundPlayerInfoRemovePacket(List.of(serverPlayer.getUUID()));
             p.connection.send(packet);
         }
     }
