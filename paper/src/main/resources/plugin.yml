@@ -1,10 +1,10 @@
-name: ${name}
-description: Tag players in combat
+name: ${pluginName}
 version: ${version}
 authors: [Byteflux, Sudzzy]
 main: net.minelink.ctplus.CombatTagPlus
 softdepend: [BarAPI, PlayerHeads, WorldGuard, Factions, Towny, BossBarAPI, ActionBarAPI, mcMMO]
-api-version: 1.14
+description: ${description}
+api-version: ${api_version}
 commands:
   combattagplus:
     aliases: [ctplus, ct, combattag]

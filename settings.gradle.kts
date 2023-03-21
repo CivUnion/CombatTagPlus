@@ -1,5 +1,3 @@
-rootProject.name = "combattagplus"
-
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -8,3 +6,5 @@ pluginManagement {
 }
 
 include(":paper")
+
+project(":paper").name = rootProject.name

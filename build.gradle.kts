@@ -1,21 +1,39 @@
-val pluginName: String by project
-
 plugins {
-    id("org.sonarqube") version "3.3"
+    `java-library`
+    `maven-publish`
 }
+
+gradle.buildFinished {
+    project.buildDir.deleteRecursively()
+}
+
+allprojects {
+    group = rootProject.group
+    version = rootProject.version
+    description = rootProject.description
+}
+
 
 subprojects {
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
 
-    project.setProperty("archivesBaseName", "$pluginName-$name-$version")
-
-    configure<JavaPluginExtension> {
+    java {
+        toolchain.languageVersion.set(JavaLanguageVersion.of(17))
         withJavadocJar()
         withSourcesJar()
+    }
 
-        toolchain {
-            languageVersion.set(JavaLanguageVersion.of(17))
+    tasks {
+        compileJava {
+            options.encoding = Charsets.UTF_8.name()
+            options.release.set(17)
+        }
+        processResources {
+            filteringCharset = Charsets.UTF_8.name()
+            filesMatching("**/plugin.yml") {
+                expand( project.properties )
+            }
         }
     }
 
@@ -28,39 +46,20 @@ subprojects {
         maven("https://jitpack.io")
     }
 
-    configure<PublishingExtension> {
+    publishing {
         repositories {
             maven {
-                name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/CivMC/$pluginName")
+                url = uri("https://nexus.civunion.com/repository/maven-releases/")
                 credentials {
-                    username = System.getenv("GITHUB_ACTOR")
-                    password = System.getenv("GITHUB_TOKEN")
-                }
-            }
-
-            val targetRepo = if (version.toString().endsWith("SNAPSHOT")) "maven-snapshots" else "maven-releases"
-            maven {
-                name = "CivMC"
-                url = uri("https://repo.civmc.net/repository/$targetRepo/")
-                credentials {
-                    username = System.getenv("CIVMC_NEXUS_USER")
-                    password = System.getenv("CIVMC_NEXUS_PASSWORD")
+                    username = System.getenv("REPO_USERNAME")
+                    password = System.getenv("REPO_PASSWORD")
                 }
             }
         }
         publications {
-            register<MavenPublication>("mavenJava") {
+            register<MavenPublication>("main") {
                 from(components["java"])
             }
         }
-    }
-}
-
-sonarqube {
-    properties {
-        property("sonar.projectKey", "CivMC_$pluginName")
-        property("sonar.organization", "civmc")
-        property("sonar.host.url", "https://sonarcloud.io")
     }
 }
